@@ -19,6 +19,7 @@ class PropertyString
 
   def fetch(property, *default, &block)
     fetch_default = -> do
+      raise KeyError, "property #{property} not found" unless default.any? || block_given?
       block_given? ? block[property] : default[0]
     end
 
@@ -26,12 +27,11 @@ class PropertyString
 
     begin
       value = fetch_property_chain(property)
-    rescue => e
+      return value unless value == KEY_NOT_FOUND
+    rescue NoMethodError => e
+      warn e if ENV["DEBUG"]
       return fetch_default[]
     end
-
-    return value unless value == KEY_NOT_FOUND
-    raise KeyError, "key #{property} not found" unless default.any? || block_given?
 
     fetch_default[]
   end
@@ -67,7 +67,7 @@ class PropertyString
 
   def find_index_value(value, prop)
     unless value.respond_to?(:[])
-      raise TypeError, "Cannot access index '#{prop}': previous method call returned an #{value.class}"
+      raise TypeError, "Cannot access index #{prop} on #{value.class}"
     end
 
     if !value.is_a?(Hash)

@@ -67,6 +67,16 @@ RSpec.describe PropertyString do
       expect(ps.fetch("foo.bar.baz")).to eq 123
       expect(ps.fetch("foo.bar.a_hash.a", 999)).to eq 123
     end
+
+    it "raises an error when the property does not exist" do
+      ps = PropertyString.new(Obj.new)
+
+      expect(ps.fetch("an_array.1")).to eq 2
+      expect { ps.fetch("an_array.9999") }.to raise_error(KeyError, "property an_array.9999 not found")
+
+      expect(ps.fetch("foo.bar.a_hash")).to be_a Hash
+      expect { ps.fetch("foo.bar.does_not_exist") }.to raise_error(KeyError, "property foo.bar.does_not_exist not found")
+    end
   end
 
   describe "#[]" do
