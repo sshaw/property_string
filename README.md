@@ -1,5 +1,7 @@
 # PropertyString
 
+![PropertyString CI Status](https://github.com/sshaw/property_string/workflows/CI/badge.svg "PropertyString CI Status")
+
 Use Java-style property notation to execute method call chains on an object.
 
 ## Installation
