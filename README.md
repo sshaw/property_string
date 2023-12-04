@@ -17,12 +17,6 @@ If bundler is not being used to manage dependencies, install the gem by executin
 ## Usage
 
 ```rb
-# Hash
-h.dig(:some, "nested", :hash)   # foo
-
-ph = PropertyString(h)
-ph["some.nested.hash"]
-
 # Object call chain
 product.company.name            # bar
 
@@ -39,7 +33,19 @@ ps["posts.0.replied_to.name"]       # sshaw
 ps = PropertyString.new(product)
 ps["company.does_not_exist!"] # NoMethodError
 
-# Ignore
+# Can work with a Hash
+h.dig(:some, "nested", :hash)   # foo
+
+ph = PropertyString(h)
+ph["some.nested.hash"]
+
+# Or an Array
+a[0][0][0]
+
+ph = PropertyString(a)
+ph["0.0.0"]
+
+# Ignore MethodMissing errors for unknown properties
 ps = PropertyString.new(product, :raise_if_method_missing => false)
 ps["company.does_not_exist!"] # nil
 
