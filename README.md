@@ -50,7 +50,7 @@ ps = PropertyString.new(product, :raise_if_method_missing => false)
 ps["company.does_not_exist!"] # nil
 
 # Fetching
-ps.fetch("posts.9999", "your default") # shaw
+ps.fetch("posts.9999", "your default")
 ps.fetch("posts.9999") { |key| "some_default_for_#{key}" }
 ```
 
