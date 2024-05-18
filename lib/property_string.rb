@@ -70,9 +70,7 @@ class PropertyString
 
     raise_if_method_not_allowed(value, prop)
 
-    if @options[:raise_if_method_missing]
-      value.public_send(prop)
-    elsif value.respond_to?(prop)
+    if @options[:raise_if_method_missing] || value.respond_to?(prop)
       value.public_send(prop)
     end
   end
