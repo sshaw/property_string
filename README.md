@@ -36,23 +36,36 @@ ps["company.does_not_exist!"] # NoMethodError
 # Can work with a Hash
 h.dig(:some, "nested", :hash)   # foo
 
-ph = PropertyString(h)
-ph["some.nested.hash"]
+ps = PropertyString(h)
+ps["some.nested.hash"]
 
 # Or an Array
 a[0][0][0]
 
-ph = PropertyString(a)
-ph["0.0.0"]
-
-# Ignore MethodMissing errors for unknown properties
-ps = PropertyString.new(product, :raise_if_method_missing => false)
-ps["company.does_not_exist!"] # nil
+ps = PropertyString(a)
+ps["0.0.0"]
 
 # Fetching
 ps.fetch("posts.9999", "your default")
 ps.fetch("posts.9999") { |key| "some_default_for_#{key}" }
 ```
+
+### Ignore `NoMethodError` for Unknown Properties
+
+```rb
+ps = PropertyString.new(product, :raise_if_method_missing => false)
+ps["company.does_not_exist!"] # nil
+```
+
+### Restrict Methods That Can Be Called
+
+```rb
+ps = PropertyString.new(product, :whitelist => { Product => %w[company], Company => %w[name] })
+ps["id"] # PropertyString::MethodNotAllowed
+ps["company.id"] # PropertyString::MethodNotAllowed
+```
+
+Currently does not work when a superclass is whitelisted but trivial to add.
 
 ## See Also
 

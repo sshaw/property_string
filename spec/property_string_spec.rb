@@ -31,6 +31,10 @@ end
 class Bar
   include Collections
 
+  def whatever
+    999
+  end
+
   def baz
     123
   end
@@ -95,6 +99,41 @@ RSpec.describe PropertyString do
 
         expect(ps["xxx"]).to be_nil
         expect(ps["foo.does_not_exist"]).to be_nil
+      end
+    end
+
+    context "when provided a whitelist" do
+      it "raises a NoMethodError when :raise_if_method_missing is true and an unknown, non whitelisted method is called" do
+        ps = PropertyString.new(
+          Obj.new,
+          :raise_if_method_missing => true,
+          :whitelist => { Obj => %w[foo] }
+        )
+
+        expect { ps["foo"] }.to_not raise_error
+        expect { ps["bar"] }.to raise_error(NoMethodError, /bar/)
+      end
+
+      it "raises a MethodNotAllowed error for a nested property containing a restricted method" do
+        ps = PropertyString.new(
+          Obj.new,
+          :whitelist => { Obj => %w[foo], Foo => %w[bar], Bar => %w[baz] }
+        )
+
+        expect { ps["foo"] }.to_not raise_error
+        expect { ps["foo.bar"] }.to_not raise_error
+        expect { ps["foo.bar.baz"] }.to_not raise_error
+        expect { ps["foo.bar.whatever"] }.to raise_error(described_class::MethodNotAllowed, "Access to Bar#whatever is not allowed")
+      end
+
+      it "does not raise a MethodNotAllowed error for an unknown Hash key" do
+        ps = PropertyString.new(
+          Obj.new,
+          :whitelist => { Obj => %w[a_hash] }
+        )
+
+        expect(ps["a_hash.a"]).to eq 123
+        expect { ps["a_hash.does_not_exist"] }.to_not raise_error
       end
     end
 

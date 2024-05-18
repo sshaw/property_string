@@ -1,14 +1,22 @@
 # frozen_string_literal: true
 
 class PropertyString
-  VERSION = "0.0.1"
+  VERSION = "0.0.2"
   KEY_NOT_FOUND = "__#{object_id}-not-found-placeholder-#{object_id}__"
+
+  class MethodNotAllowed < StandardError
+    def initialize(object, method)
+      target = object.is_a?(Class) ? "#{object}.#{method}" : "#{object.class}##{method}"
+      super "Access to #{target} is not allowed"
+    end
+  end
 
   def initialize(object, options = nil)
     @object = object
 
     @options = (options || {}).dup
     @options[:raise_if_method_missing] = true unless @options.include?(:raise_if_method_missing)
+    @options[:whitelist] = @options[:whitelist] || {}
   end
 
   def [](property)
@@ -57,8 +65,12 @@ class PropertyString
   def find_non_index_value(value, prop)
     if value.is_a?(Hash)
       value = find_hash_value(value, prop)
-      value == KEY_NOT_FOUND ? nil : value
-    elsif @options[:raise_if_method_missing]
+      return value == KEY_NOT_FOUND ? nil : value
+    end
+
+    raise_if_method_not_allowed(value, prop)
+
+    if @options[:raise_if_method_missing]
       value.public_send(prop)
     elsif value.respond_to?(prop)
       value.public_send(prop)
@@ -93,5 +105,14 @@ class PropertyString
     return hash[sym_prop] if hash.include?(sym_prop)
 
     KEY_NOT_FOUND
+  end
+
+  def raise_if_method_not_allowed(value, prop)
+    klass = value.is_a?(Class) ? value : value.class
+    # Make sure we do not raise this if the object does not respond_to? prop
+    # TODO: class hierarchy
+    if @options[:whitelist].include?(klass) && !@options[:whitelist][klass].include?(prop) && value.respond_to?(prop)
+      raise MethodNotAllowed.new(value, prop)
+    end
   end
 end
