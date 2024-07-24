@@ -36,13 +36,13 @@ ps["company.does_not_exist!"] # NoMethodError
 # Can work with a Hash
 h.dig(:some, "nested", :hash)   # foo
 
-ps = PropertyString(h)
+ps = PropertyString.new(h)
 ps["some.nested.hash"]
 
 # Or an Array
 a[0][0][0]
 
-ps = PropertyString(a)
+ps = PropertyString.new(a)
 ps["0.0.0"]
 
 # Fetching
