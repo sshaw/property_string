@@ -4,7 +4,7 @@ require "spec_helper"
 
 module Collections
   def a_hash
-    {:a => 123}
+    {:a => 123, 1 => "you got an int"}
   end
 
   def an_array
@@ -157,6 +157,11 @@ RSpec.describe PropertyString do
     it "returns the object's value for foo.bar.baz" do
       ps = PropertyString.new(Obj.new)
       expect(ps["foo.bar.baz"]).to eq 123
+    end
+
+    it "returns the object's value for an integer key" do
+      ps = PropertyString.new(Obj.new)
+      expect(ps["foo.a_hash.1"]).to eq "you got an int"
     end
 
     it "returns the object's value for an array index" do
